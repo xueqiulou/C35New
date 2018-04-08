@@ -50,6 +50,22 @@
 
 {
     
+    //做一个动画
+    CGFloat scale = 1.2;
+    
+    [UIView animateWithDuration:0.3f animations:^{
+        
+        self.transform = CGAffineTransformMakeScale(scale, scale);
+        
+    } completion:^(BOOL finished) {
+        
+        if (finished) {
+            [UIView animateWithDuration:0.3 animations:^{
+                self.transform = CGAffineTransformIdentity;
+            }];
+        }
+    }];
+    
     //得到音效文件的地址
     
     NSString*soundFilePath =[[NSBundle mainBundle]pathForResource:name ofType:type];
