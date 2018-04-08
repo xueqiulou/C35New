@@ -1,0 +1,34 @@
+//
+//  CV98PrefixHeader.pch
+//  CV98
+//
+//  Created by TimeMachine on 2018/4/8.
+//  Copyright © 2018年 TimeMachine. All rights reserved.
+//
+
+#ifndef CV98PrefixHeader_pch
+#define CV98PrefixHeader_pch
+
+// Include any system framework and library headers here that should be included in all compilation units.
+// You will also need to set the Prefix Header build setting of one or more of your targets to reference this file.
+
+#define LGScreenWidth [UIScreen mainScreen].bounds.size.width
+#define LGScreenHeight [UIScreen mainScreen].bounds.size.height
+#define screenSize [UIScreen mainScreen].bounds.size
+#define lineSpace 15
+#define LGRGBColor(r, g, b) LGRGBColorAlpha(r, g, b, 1.0)
+#define LGRGBColorAlpha(r, g, b, a) [UIColor colorWithRed:(r)/255.0 green:(g)/255.0 blue:(b)/255.0 alpha:a]
+
+#define stageValue @"stageValue"
+#define bestTime @"bestTime"
+#define tipsCount @"tipsCount"
+
+#import "MyButton.h"
+#import "UIView+frame.h"
+
+static NSString * const CompletedGameNotification = @"CompletedGameNotification";
+static NSString * const NextGameNotification = @"NextGameNotification";
+static NSString * const LGNotificationKey = @"LGNotificationKey";
+static NSString * const LGNotificationReceiveNotification = @"LGNotificationReceiveNotification";
+
+#endif /* CV98PrefixHeader_pch */
