@@ -25,6 +25,7 @@
 
 #import "MyButton.h"
 #import "UIView+frame.h"
+#import "UIImage+color.h"
 
 static NSString * const CompletedGameNotification = @"CompletedGameNotification";
 static NSString * const NextGameNotification = @"NextGameNotification";
