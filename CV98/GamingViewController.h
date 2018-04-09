@@ -11,5 +11,6 @@
 @interface GamingViewController : UIViewController
 
 
+@property (nonatomic,strong) NSString    *fileName;
 
 @end

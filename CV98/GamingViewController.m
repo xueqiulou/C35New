@@ -8,9 +8,11 @@
 
 #import "GamingViewController.h"
 #import "SuccessViewController.h"
+#import <AVFoundation/AVFoundation.h>
 
-static NSInteger characterCount = 18;
-static NSInteger columnCount = 6;
+
+static NSInteger characterCount = 10;
+static NSInteger columnCount = 5;
 
 @interface GamingViewController ()
 @property (weak, nonatomic) IBOutlet UIView *answerView;
@@ -30,6 +32,7 @@ static NSInteger columnCount = 6;
     NSDictionary *currentQuestionDic;
     NSInteger stageCount;
     NSArray *words;
+    SystemSoundID soundFileObject;
 }
 
 - (void)viewDidLoad {
@@ -39,7 +42,7 @@ static NSInteger columnCount = 6;
     
     arr = @[@"a",@"b",@"c",@"d",@"e",@"f",@"g",@"h",@"i",@"j",@"k",@"l",@"m",@"n",@"o",@"p",@"q",@"r",@"s",@"t",@"u",@"v",@"w",@"x",@"y",@"z"].mutableCopy;
     
-    NSString *filePath = [[NSBundle mainBundle] pathForResource:@"FruitsWords" ofType:@"plist"];
+    NSString *filePath = [[NSBundle mainBundle] pathForResource:self.fileName ofType:@"plist"];
     words = [[NSArray alloc] initWithContentsOfFile:filePath];
     
     NSLog(@"%@",words);
@@ -94,6 +97,18 @@ static NSInteger columnCount = 6;
     [self.navigationController popViewControllerAnimated:YES];
 }
 
+-(void)tips:(MyButton *)sender
+{
+    UIAlertController *alertVC = [UIAlertController alertControllerWithTitle:question message:nil preferredStyle:UIAlertControllerStyleAlert];
+//    UIAlertAction *sure = [UIAlertAction actionWithTitle:@"sure" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+//        [self refresh:nil];
+//    }];
+//    [alertVC addAction:sure];
+    [self presentViewController:alertVC animated:YES completion:nil];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [alertVC dismissViewControllerAnimated:YES completion:nil];
+    });
+}
 
 -(void)createCharatorButton:(NSInteger)index superView:(UIView *)superView
 {
@@ -109,10 +124,20 @@ static NSInteger columnCount = 6;
     for (int j=0; j<characterCount-index; j++) {//随机插入混淆字母
         NSInteger index_ = arc4random()%26;
         NSString *confusionStr = arr[index_];
-        
+
         index_ = arc4random()%index;
         [characterArr insertObject:confusionStr atIndex:index_];
     }
+    
+    
+    characterArr = (NSMutableArray *)[characterArr sortedArrayUsingComparator:^NSComparisonResult(NSString *str1, NSString *str2) {
+        int seed = arc4random_uniform(2);
+        if (seed) {  
+            return [str1 compare:str2];
+        } else {
+            return [str2 compare:str1];
+        }
+    }];
     
     for (int i=0; i<characterArr.count; i++) {
         MyButton *btn = [MyButton buttonWithType:UIButtonTypeCustom];
@@ -141,11 +166,22 @@ static NSInteger columnCount = 6;
     
     if ([answerStr isEqualToString:question]) {
         NSLog(@"拼写成功");//过关,显示下一关
+        [self playdSoulndEffrect:@"success" type:nil];
         [self performSegueWithIdentifier:@"success" sender:nil];
         stageCount++;
         currentQuestionDic = words[stageCount];
         question = currentQuestionDic[@"name"];
         [self showNewQuestion];
+    }else{
+        if (answerStr.length==question.length) {
+            [self playdSoulndEffrect:@"wrong" type:nil];
+            UIAlertController *alertVC = [UIAlertController alertControllerWithTitle:@"Please try again" message:nil preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertAction *sure = [UIAlertAction actionWithTitle:@"sure" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                [self refresh:nil];
+            }];
+            [alertVC addAction:sure];
+            [self presentViewController:alertVC animated:YES completion:nil];
+        }
     }
     
     self.answerL.text = answerStr;
@@ -173,6 +209,7 @@ static NSInteger columnCount = 6;
 - (IBAction)undo:(UIButton *)sender {
     
     if (answerStr.length) {
+        [self playdSoulndEffrect:@"card" type:nil];
         [answerStr deleteCharactersInRange:NSMakeRange(answerStr.length-1, 1)];
         self.answerL.text = answerStr;
     }
@@ -183,6 +220,30 @@ static NSInteger columnCount = 6;
 {
     SuccessViewController *vc = segue.destinationViewController;
     vc.name = question;
+    vc.img = currentQuestionDic[@"img"];
+    
+}
+
+
+- (void)playdSoulndEffrect:(NSString*)name type:(NSString*)type
+
+{
+    
+    //得到音效文件的地址
+    
+    NSString*soundFilePath =[[NSBundle mainBundle]pathForResource:name ofType:@"mp3"];
+    
+    //将地址字符串转换成url
+    
+    NSURL*soundURL = [NSURL fileURLWithPath:soundFilePath];
+    
+    //生成系统音效id
+    
+    AudioServicesCreateSystemSoundID((__bridge CFURLRef)soundURL, &soundFileObject);
+    
+    //播放系统音效
+    
+    AudioServicesPlaySystemSound(soundFileObject);
     
 }
 
